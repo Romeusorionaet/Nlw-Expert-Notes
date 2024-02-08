@@ -1,5 +1,5 @@
 import * as Dialog from '@radix-ui/react-dialog'
-import { X } from 'lucide-react'
+import { Circle, StopCircle, X } from 'lucide-react'
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -9,6 +9,7 @@ interface NewNoteCardProps {
 
 export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
   const [shouldShowOnBoarding, setShouldShowOnBoarding] = useState(true)
+  const [isRecording, setIsRecording] = useState(false)
   const [content, setContent] = useState('')
 
   const handleStartEditor = () => {
@@ -31,8 +32,55 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
     toast.success('Nota criada com sucesso!')
 
     setShouldShowOnBoarding(true)
-
     setContent('')
+  }
+
+  let speechRecognition: SpeechRecognition | null
+
+  const handleStartRecording = () => {
+    const isSpeechRecognitionAPIAvailable =
+      'SpeechRecognition' in window || 'webkitSpeechRecognition' in window
+
+    if (!isSpeechRecognitionAPIAvailable) {
+      alert('Infelizmente seu navegador não suporta a API de gravação!')
+      return
+    }
+
+    setIsRecording(true)
+    setShouldShowOnBoarding(false)
+
+    const SpeechRecognitionAPI =
+      window.SpeechRecognition || window.webkitSpeechRecognition
+
+    speechRecognition = new SpeechRecognitionAPI()
+
+    speechRecognition.lang = 'pt-BR'
+    speechRecognition.continuous = true
+    speechRecognition.maxAlternatives = 1
+    speechRecognition.interimResults = true
+
+    speechRecognition.onresult = (event) => {
+      const transcription = Array.from(event.results).reduce((text, result) => {
+        return text.concat(result[0].transcript)
+      }, '')
+
+      setContent(transcription)
+    }
+
+    speechRecognition.onerror = (event) => {
+      console.error(event)
+    }
+
+    speechRecognition.start()
+  }
+
+  const handleStopRecording = () => {
+    setIsRecording(false)
+    setShouldShowOnBoarding(true)
+
+    if (speechRecognition !== null) {
+      speechRecognition.stop()
+    }
   }
 
   return (
@@ -63,11 +111,16 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
                 {shouldShowOnBoarding ? (
                   <p className="text-sm leading-6 text-slate-400">
                     Comece{' '}
-                    <button className="font-medium text-lime-400 hover:underline">
+                    <button
+                      type="button"
+                      onClick={handleStartRecording}
+                      className="font-medium text-lime-400 hover:underline"
+                    >
                       gravando uma nota
                     </button>{' '}
                     em áudio ou se preferir{' '}
                     <button
+                      type="button"
                       onClick={handleStartEditor}
                       className="font-medium text-lime-400 hover:underline"
                     >
@@ -84,13 +137,25 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
                 )}
               </div>
 
-              <button
-                type="submit"
-                disabled={content === ''}
-                className="w-full disabled:cursor-not-allowed disabled:bg-lime-700 bg-lime-400 py-4 font-medium text-center text-sm text-lime-950 to-slate-300 outline-none hover:bg-lime-500 duration-300"
-              >
-                Salvar nota
-              </button>
+              {isRecording ? (
+                <button
+                  type="button"
+                  onClick={handleStopRecording}
+                  className="w-full flex justify-center items-center gap-2 bg-slate-800 py-4 font-medium text-center text-sm text-slate-300 to-slate-900 outline-none hover:text-slate-100 duration-300"
+                >
+                  <Circle className="bg-red-500 animate-pulse text-red-500 rounded-full size-3" />
+                  Gravando... clique p/ interromper
+                  <StopCircle className="size-5 text-white" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={content === ''}
+                  className="w-full disabled:cursor-not-allowed disabled:bg-lime-700 bg-lime-400 py-4 font-medium text-center text-sm text-lime-950 to-slate-300 outline-none hover:bg-lime-500 duration-300"
+                >
+                  Salvar nota
+                </button>
+              )}
             </form>
           </Dialog.DialogContent>
         </Dialog.Overlay>
