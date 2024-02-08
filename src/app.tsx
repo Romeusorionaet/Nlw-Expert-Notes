@@ -1,13 +1,53 @@
+import { ChangeEvent, useState } from 'react'
 import logoNlwExpert from './assets/logo-nlw-expert.svg'
 import { NewNoteCard } from './components/new-note-card'
 import { NoteCard } from './components/note-card'
 
-const note = {
-  date: new Date(),
-  content: 'hiubiu',
+interface Note {
+  id: string
+  date: Date
+  content: string
 }
 
 export function App() {
+  const [search, setSearch] = useState('')
+  const [notes, setNotes] = useState<Note[]>(() => {
+    const notesOnStorage = localStorage.getItem('@nlw-expert-notes.0.1')
+
+    if (notesOnStorage) {
+      return JSON.parse(notesOnStorage)
+    }
+
+    return []
+  })
+
+  const onNoteCreated = (content: string) => {
+    const newNote = {
+      id: crypto.randomUUID(),
+      date: new Date(),
+      content,
+    }
+
+    const notesArray = [newNote, ...notes]
+
+    setNotes(notesArray)
+
+    localStorage.setItem('@nlw-expert-notes.0.1', JSON.stringify(notesArray))
+  }
+
+  const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+    const query = event.target.value
+
+    setSearch(query)
+  }
+
+  const filteredNotes =
+    search !== ''
+      ? notes.filter((note) =>
+          note.content.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+        )
+      : notes
+
   return (
     <div className="mx-auto max-w-6xl my-12 space-y-6">
       <img src={logoNlwExpert} alt="NLW Expert" />
@@ -15,6 +55,7 @@ export function App() {
       <form className="w-full">
         <input
           type="text"
+          onChange={handleSearch}
           placeholder="Busque em suas notas..."
           className="w-full bg-transparent text-3xl font-semibold tracking-tight outline-none placeholder:text-slate-500"
         />
@@ -23,9 +64,11 @@ export function App() {
       <div className="h-px bg-slate-700" />
 
       <div className="grid grid-cols-3 gap-6 auto-rows-[250px]">
-        <NewNoteCard />
+        <NewNoteCard onNoteCreated={onNoteCreated} />
 
-        <NoteCard note={note} />
+        {filteredNotes.map((note) => {
+          return <NoteCard key={note.id} note={note} />
+        })}
       </div>
     </div>
   )
