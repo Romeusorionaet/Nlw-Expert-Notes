@@ -4,10 +4,11 @@ import { ptBR } from 'date-fns/locale'
 import { X } from 'lucide-react'
 
 interface NoteCardProps {
-  note: { date: Date; content: string }
+  note: { id: string; date: Date; content: string }
+  onNoteDeleted: (id: string) => void
 }
 
-export function NoteCard({ note }: NoteCardProps) {
+export function NoteCard({ note, onNoteDeleted }: NoteCardProps) {
   return (
     <Dialog.Root>
       <Dialog.Trigger className="text-left flex flex-col gap-3 rounded-md bg-slate-800 p-5 overflow-hidden relative hover:ring-2 hover:ring-slate-600 duration-300 outline-none focus-visible:ring-2 focus-visible:ring-lime-500">
@@ -23,7 +24,7 @@ export function NoteCard({ note }: NoteCardProps) {
       </Dialog.Trigger>
       <Dialog.DialogPortal>
         <Dialog.Overlay className="inset-0 fixed bg-black/60">
-          <Dialog.DialogContent className="overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[640px] w-full h-[60vh] bg-slate-700 rounded-md flex flex-col outline-none">
+          <Dialog.DialogContent className="overflow-hidden inset-0 md:inset-auto fixed md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-[640px] w-full md:h-[60vh] bg-slate-700 md:rounded-md flex flex-col outline-none">
             <Dialog.DialogClose className="absolute bottom right-0 top-0 bg-slate-800 p-1.5 text-slate-400 hover:text-slate-100">
               <X className="size-5" />
             </Dialog.DialogClose>
@@ -39,6 +40,7 @@ export function NoteCard({ note }: NoteCardProps) {
             </div>
 
             <button
+              onClick={() => onNoteDeleted(note.id)}
               type="button"
               className="group w-full bg-slate-800 py-4 font-medium text-center to-slate-300 outline-none"
             >

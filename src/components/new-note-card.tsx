@@ -98,7 +98,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
       </Dialog.Trigger>
       <Dialog.DialogPortal>
         <Dialog.Overlay className="inset-0 fixed bg-black/60">
-          <Dialog.DialogContent className="overflow-hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[640px] w-full h-[60vh] bg-slate-700 rounded-md flex flex-col outline-none">
+          <Dialog.DialogContent className="overflow-hidden inset-0 md:inset-auto fixed md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:max-w-[640px] w-full md:h-[60vh] bg-slate-700 md:rounded-md flex flex-col outline-none">
             <Dialog.DialogClose className="absolute bottom right-0 top-0 bg-slate-800 p-1.5 text-slate-400 hover:text-slate-100">
               <X className="size-5" />
             </Dialog.DialogClose>
@@ -143,7 +143,7 @@ export function NewNoteCard({ onNoteCreated }: NewNoteCardProps) {
                   onClick={handleStopRecording}
                   className="w-full flex justify-center items-center gap-2 bg-slate-800 py-4 font-medium text-center text-sm text-slate-300 to-slate-900 outline-none hover:text-slate-100 duration-300"
                 >
-                  <Circle className="bg-red-500 animate-pulse text-red-500 rounded-full size-3" />
+                  <Circle className="bg-red-500 animate-pulse text-red-500 md:rounded-full size-3" />
                   Gravando... clique p/ interromper
                   <StopCircle className="size-5 text-white" />
                 </button>
